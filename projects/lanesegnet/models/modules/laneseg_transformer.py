@@ -56,7 +56,12 @@ class LaneSegNetTransformer(BaseModule):
                 cls_branches=None,
                 **kwargs):
 
-        bs = mlvl_feats[0].size(0)
+        if mlvl_feats is not None:
+            bs = mlvl_feats[0].size(0)
+        else:
+            if bev_embed.dim() != 3:
+                raise ValueError(f'Expected 3D bev_embed when mlvl_feats is None, got {bev_embed.shape}')
+            bs = bev_embed.size(0)
         query_pos, query = torch.split(
             object_query_embed, self.embed_dims, dim=1)
         query_pos = query_pos.unsqueeze(0).expand(bs, -1, -1)

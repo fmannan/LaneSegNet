@@ -1,0 +1,11 @@
+# Merge on Linux hosts with NVIDIA drivers + NVIDIA Container Toolkit:
+#   docker compose -f docker-compose.yml -f docker-compose.linux-gpu.yml up -d
+#
+# Docker Desktop on macOS does not provide the "nvidia" runtime; use the base
+# docker-compose.yml only there (CPU / no discrete NVIDIA in the container).
+
+services:
+  lanesegnet:
+    gpus: all
+  jupyter:
+    gpus: all

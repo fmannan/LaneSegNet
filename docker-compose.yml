@@ -1,0 +1,72 @@
+services:
+  lanesegnet:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lanesegnet:latest
+    container_name: lanesegnet-dev
+
+    # GPU: use docker-compose.linux-gpu.yml on Linux + NVIDIA (see DOCKER_DEV_GUIDE.md).
+    # Do not set runtime: nvidia here — Docker Desktop on macOS has no "nvidia" runtime.
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+    # Volume mounts for development
+    volumes:
+      - .:/workspace
+      # Point at your OpenLane-V2 tree if data is not under ./data
+      - ./data:/workspace/data
+      - ./work_dirs:/workspace/work_dirs
+      - ./output:/workspace/output
+
+    # Interactive terminal
+    stdin_open: true
+    tty: true
+
+    # Port mappings
+    ports:
+      # Jupyter
+      - "8889:8888"
+      # TensorBoard
+      - "6007:6006"
+      # Additional ports for other services
+      - "5001:5000"
+
+    # Working directory
+    working_dir: /workspace
+
+    # Keep container running
+    command: sleep infinity
+
+  # Optional: Jupyter notebook service for development
+  jupyter:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lanesegnet:latest
+    container_name: lanesegnet-jupyter
+
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+    volumes:
+      - .:/workspace
+      - ./data:/workspace/data
+      - ./work_dirs:/workspace/work_dirs
+      - ./output:/workspace/output
+
+    ports:
+      - "8890:8888"
+
+    working_dir: /workspace
+
+    command: >
+      bash -c "pip install jupyter notebook &&
+               jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root"
+
+    stdin_open: true
+    tty: true

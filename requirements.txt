@@ -1,6 +1,7 @@
 similaritymeasures==0.6.0
 numpy==1.22.4
 scipy==1.8.0
-ortools==9.2.9972
-setuptools==59.5.0
-openlanev2==2.1.0
+ortools==9.3.10497
+setuptools==60.2.0
+iso3166==2.1.1
+yapf==0.32.0

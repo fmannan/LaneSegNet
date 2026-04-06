@@ -51,6 +51,8 @@ This repository can be used as a starting point for Mapless Driving track.
 - [Installation](#installation)
 - [Prepare Dataset](#prepare-dataset)
 - [Train and Evaluate](#train-and-evaluate)
+- [Diagnostics and dataset tools](#diagnostics-and-dataset-tools)
+- [Docker (optional)](#docker-optional)
 - [License and Citation](#license-and-citation)
 
 ## Model Zoo
@@ -104,9 +106,21 @@ pip install mmsegmentation==0.29.1
 pip install mmdet3d==1.0.0rc6
 ```
 
-Install other required packages.
+Install other required packages. `openlanev2==2.1.0` declares an `ortools` version that is not always available on PyPI; install OpenLane-V2 without pulling its dependencies, then install the rest from `requirements.txt`.
+
 ```bash
+pip install --no-deps openlanev2==2.1.0
 pip install -r requirements.txt
+```
+
+## Docker (optional)
+
+GPU images use CUDA 11.3, PyTorch 1.12.1, and the same OpenMMLab stack as documented in the [Docker development guide](./DOCKER_DEV_GUIDE.md).
+
+```bash
+docker-compose build
+docker-compose up lanesegnet -d
+docker-compose exec lanesegnet bash
 ```
 
 ## Prepare Dataset
@@ -160,6 +174,19 @@ You can set `--show` to visualize the results.
 ```bash
 ./tools/dist_test.sh 8 [--show]
 ```
+
+## Diagnostics and dataset tools
+
+Optional scripts under [`tools/`](./tools/) for debugging queries and exploring raw OpenLane-V2 layout (independent of MMDet unless noted).
+
+| Script | Purpose |
+| :--- | :--- |
+| [`tools/debug_queries.py`](./tools/debug_queries.py) | Inspect DETR lane queries, BEV features, priors, and optional per-decoder-layer stats. Needs a **config + checkpoint** (GPU recommended). Example (priors only, no dataloader): `python tools/debug_queries.py --config projects/configs/lanesegnet_r50_8x1_24e_olv2_subset_A.py --checkpoint /path/to/epoch_24.pth --priors_only --output_dir ./debug_out` |
+| [`tools/group_openlane_by_geometry.py`](./tools/group_openlane_by_geometry.py) | Scan raw OpenLane-V2 JSON (`{split}/{segment}/info/*.json`); write `segment_summary.jsonl`, stats, and optional stratified splits. Example: `python tools/group_openlane_by_geometry.py --data_root ./data/OpenLane-V2 --split train --output_dir ./openlane_groups_train` |
+| [`tools/visualize_openlane_groups.py`](./tools/visualize_openlane_groups.py) | Plot histograms and bucket charts from `group_openlane_by_geometry.py` outputs. |
+| [`tools/sample_group_images.py`](./tools/sample_group_images.py) | Sample frames per geometry bucket; saves front camera + BEV GT. |
+
+[`tools/visualize_map_queries.py`](./tools/visualize_map_queries.py) draws SD-map query polylines from the **training dataset** (`map_query_segs` / `map_query_mask`). The default configs in this repository do **not** populate those keys; use this only if you add a map-query-style dataset pipeline (otherwise you will get a `KeyError`).
 
 ## License and Citation
 All assets and code are under the [Apache 2.0 license](./LICENSE) unless specified otherwise.

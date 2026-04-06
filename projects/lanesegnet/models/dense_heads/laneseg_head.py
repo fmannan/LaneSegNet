@@ -252,7 +252,7 @@ class LaneSegHead(AnchorFreeHead):
                 head with normalized value in the range of [0,1].
                 Shape []
         """
-        dtype = mlvl_feats[0].dtype
+        dtype = mlvl_feats[0].dtype if mlvl_feats is not None else bev_feats.dtype
         object_query_embeds = self.query_embedding.weight.to(dtype)
         outputs = self.transformer(
             mlvl_feats,

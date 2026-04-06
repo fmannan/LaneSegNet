@@ -133,4 +133,8 @@ dmypy.json
 ckpts
 data
 work_dirs
+output
 .vscode
+.DS_Store
+
+output/
